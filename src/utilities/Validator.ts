@@ -3,6 +3,7 @@ import { Guild, Snowflake } from "discord.js";
 import { AdminPermissionTable } from "./tables/AdminPermissionTable";
 import { PriorityTable } from "./tables/PriorityTable";
 import { QueueTable } from "./tables/QueueTable";
+import { R6MemberSettingsTable } from "./tables/R6MemberSettings";
 
 export class Validator {
   private static timestampCache = new Map<Snowflake, number>(); // <guild.id, timestamp>
@@ -51,6 +52,7 @@ export class Validator {
       AdminPermissionTable.validate(guild, members, roles).then();
       const requireUpdate = await PriorityTable.validate(guild, members, roles);
       QueueTable.validate(requireUpdate, guild, channels, members, roles).then();
+      R6MemberSettingsTable.validate(guild, members).then();
     } catch (e: any) {
       // console.error(e);
       // Nothing - we don't want to accidentally delete legit data

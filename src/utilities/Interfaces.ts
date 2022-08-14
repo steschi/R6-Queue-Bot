@@ -83,6 +83,16 @@ export interface Schedule {
   utc_offset: number;
 }
 
+export interface R6MemberSetting {
+  id: Snowflake;
+  guild_id: Snowflake;
+  member_id: Snowflake;
+  ubisoft_username: string;
+  ubisoft_user_id: string;
+  cached_mmr: number | null;
+  cached_unranked: boolean | null;
+}
+
 // ------ OTHER ------
 
 export enum ReplaceWith {
@@ -124,6 +134,11 @@ export interface ConfigJson {
   permissionsRegexp: string;
 
   announcementChannelId: Snowflake;
+
+  r6API: {
+    ubisoftUsername: string;
+    ubisoftPassword: string;
+  };
 }
 
 export interface Timezone {

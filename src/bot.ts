@@ -293,6 +293,16 @@ async function processCommand(parsed: Parsed, command: CommandArg[]) {
     case "myqueues":
       await Commands.myQueues(parsed);
       return;
+    case "ubisoftname":
+      switch (command[1]?.name) {
+        case "get":
+          await Commands.ubisoftnameGet(parsed);
+          return;
+        case "set":
+          await Commands.ubisoftnameSet(parsed);
+          return;
+      }
+      return;
   }
 
   if (!(await checkPermission(parsed))) {

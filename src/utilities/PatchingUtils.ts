@@ -26,6 +26,7 @@ import { QueueGuildTable } from "./tables/QueueGuildTable";
 import { QueueMemberTable } from "./tables/QueueMemberTable";
 import { QueueTable } from "./tables/QueueTable";
 import { ScheduleTable } from "./tables/ScheduleTable";
+import { R6MemberSettingsTable } from "./tables/R6MemberSettings";
 
 interface Note {
   sent: boolean;
@@ -216,6 +217,9 @@ export class PatchingUtils {
     }
     if (!(await Base.knex.schema.hasTable("schedules"))) {
       await ScheduleTable.initTable();
+    }
+    if (!(await Base.knex.schema.hasTable("r6_member_settings"))) {
+      await R6MemberSettingsTable.initTable();
     }
   }
 

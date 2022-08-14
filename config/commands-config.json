@@ -1508,5 +1508,30 @@
         "options": []
       }
     ]
+  },
+  {
+    "name": "ubisoftname",
+    "description": "ubisoftname",
+    "options": [
+      {
+        "name": "get",
+        "description": "Get your Ubisoft name",
+        "type": 1,
+        "options": []
+      },
+      {
+        "name": "set",
+        "description": "Set your Ubisoft name",
+        "type": 1,
+        "options": [
+          {
+            "name": "ubisoftname",
+            "description": "",
+            "type": 3,
+            "required": true
+          }
+        ]
+      }
+    ]
   }
 ]

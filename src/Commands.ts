@@ -25,6 +25,7 @@ import {
   StoredQueue,
 } from "./utilities/Interfaces";
 import { MessagingUtils } from "./utilities/MessagingUtils";
+import { R6ApiUtils } from "./utilities/R6ApiUtils";
 import { SchedulingUtils } from "./utilities/SchedulingUtils";
 import { AdminPermissionTable } from "./utilities/tables/AdminPermissionTable";
 import { BlackWhiteListTable } from "./utilities/tables/BlackWhiteListTable";
@@ -33,6 +34,7 @@ import { PriorityTable } from "./utilities/tables/PriorityTable";
 import { QueueGuildTable } from "./utilities/tables/QueueGuildTable";
 import { QueueMemberTable } from "./utilities/tables/QueueMemberTable";
 import { QueueTable } from "./utilities/tables/QueueTable";
+import { R6MemberSettingsTable } from "./utilities/tables/R6MemberSettings";
 import { ScheduleTable } from "./utilities/tables/ScheduleTable";
 import { Validator } from "./utilities/Validator";
 
@@ -759,6 +761,10 @@ export class Commands {
         {
           name: "`/help setup`" + (alt ? " or `!help setup`" : ""),
           value: "Setup & admin commands",
+        },
+        {
+          name: "`/ubisoftname`",
+          value: "Get/Set your ubisoft name (so we can check your MMR)",
         },
       ],
     };
@@ -2586,5 +2592,83 @@ export class Commands {
     }
 
     await this.pullHelper({ stored: storedQueue, channel: queueChannel }, parsed, targetChannel);
+  }
+
+  // --------------------------------- ubisoftname get ------------------------------- //
+
+  /**
+   * Read a users r6 username
+   */
+  public static async ubisoftnameGet(parsed: Parsed) {
+    await parsed.parseArgs({
+      command: "ubisoftname get",
+    });
+    const author = parsed.request.member as GuildMember;
+
+    try {
+      const result = await R6MemberSettingsTable.get(author.guild.id, author.id);
+
+      await parsed
+        .reply({
+          content: `Your Ubisoft name is "${result.ubisoft_username}".`,
+          commandDisplay: "EPHEMERAL",
+        })
+        .catch(() => null);
+    } catch (e: any) {
+      if (e.author === "Queue Bot") {
+        await parsed
+          .reply({
+            content: "**ERROR**: " + e.message,
+            commandDisplay: "EPHEMERAL",
+          })
+          .catch(() => null);
+        return;
+      }
+    }
+  }
+
+  // --------------------------------- ubisoftname set ------------------------------- //
+
+  /**
+   * Modify a users r6 username
+   */
+  public static async ubisoftnameSet(parsed: Parsed) {
+    if ((await parsed.parseArgs({ command: "ubisoftname set", strings: RequiredType.REQUIRED })).length) {
+      return;
+    }
+    const ubisoftUsername = parsed.string;
+    const author = parsed.request.member as GuildMember;
+
+    try {
+      const ubisoftId = await R6ApiUtils.lookupUbisoftId(ubisoftUsername);
+      if (!ubisoftId) {
+        await parsed
+          .reply({
+            content: `**ERROR**: Ubisoft name "${ubisoftUsername}" not found.`,
+            commandDisplay: "EPHEMERAL",
+          })
+          .catch(() => null);
+        return;
+      }
+
+      await R6MemberSettingsTable.store(author.guild.id, author.id, ubisoftUsername, ubisoftId);
+
+      await parsed
+        .reply({
+          content: `Your Ubisoft name is set to "${ubisoftUsername}".`,
+          commandDisplay: "EPHEMERAL",
+        })
+        .catch(() => null);
+    } catch (e: any) {
+      if (e.author === "Queue Bot") {
+        await parsed
+          .reply({
+            content: "**ERROR**: " + e.message,
+            commandDisplay: "EPHEMERAL",
+          })
+          .catch(() => null);
+        return;
+      }
+    }
   }
 }
