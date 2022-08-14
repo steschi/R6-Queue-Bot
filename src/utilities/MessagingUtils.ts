@@ -186,7 +186,7 @@ export class MessagingUtils {
         const r6Rank = await R6MemberSettingsTable.get(queueChannel.guild.id, queueMember.member_id);
 
         if (r6Rank && r6Rank.cached_mmr) {
-          rankStr = `\`MMR:${r6Rank.cached_mmr}\``;
+          rankStr = `\`MMR:${r6Rank.cached_mmr}\` `;
           if (!r6Rank.cached_unranked) {
             ranks.push(r6Rank.cached_mmr);
           }
