@@ -184,7 +184,10 @@ export class SlashCommands {
     const queueChannels = [...(await QueueTable.fetchFromGuild(guild)).values()].slice(0, 25); // max # of options is 25
     if (queueChannels.length) {
       cmd = await this.modifyQueueArg(cmd, queueChannels);
-      await SlashCommands.slashClient.createCommand(cmd, guild.id).catch(console.error);
+      await SlashCommands.slashClient.createCommand(cmd, guild.id).catch((e) => {
+        console.error(e);
+        if (e.response) console.log(e.response.data, e.response.data?.errors, JSON.stringify(e.response.data?.errors));
+      });
     }
   }
 

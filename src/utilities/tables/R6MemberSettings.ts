@@ -53,7 +53,7 @@ export class R6MemberSettingsTable {
         ubisoft_user_id: ubisoftUserId,
       });
     } else {
-      await Base.knex<R6MemberSetting>("priority").insert({
+      await Base.knex<R6MemberSetting>("r6_member_settings").insert({
         guild_id: guildId,
         member_id: memberId,
         ubisoft_username: ubisoftUsername,

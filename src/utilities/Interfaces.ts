@@ -136,7 +136,7 @@ export interface ConfigJson {
   announcementChannelId: Snowflake;
 
   r6API: {
-    ubisoftUsername: string;
+    ubisoftEmail: string;
     ubisoftPassword: string;
   };
 }

@@ -44,7 +44,14 @@ export class PatchingUtils {
     await this.tableDisplayChannels();
     await this.tableQueueGuilds();
     await this.tableSchedules();
-    this.checkCommandsFile(guilds).then();
+    this.checkCommandsFile(guilds)
+      .then()
+      .catch((e) => {
+        console.error(e);
+        if (e.response) {
+          console.log(e.response.data);
+        }
+      });
   }
 
   private static async checkCommandsFile(guilds: Collection<Snowflake, Guild>) {

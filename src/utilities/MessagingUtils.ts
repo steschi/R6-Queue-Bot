@@ -19,6 +19,7 @@ import { DisplayChannelTable } from "./tables/DisplayChannelTable";
 import { QueueGuildTable } from "./tables/QueueGuildTable";
 import { QueueMemberTable } from "./tables/QueueMemberTable";
 import { QueueTable } from "./tables/QueueTable";
+import { R6MemberSettingsTable } from "./tables/R6MemberSettings";
 import { Validator } from "./Validator";
 
 export class MessagingUtils {
@@ -157,6 +158,7 @@ export class MessagingUtils {
     // Create a list of entries
     let position = 0;
     const entries: string[] = [];
+    let ranks: number[] = [];
     for await (const queueMember of queueMembers) {
       let member: GuildMember;
       if (storedGuild.disable_mentions) {
@@ -177,16 +179,41 @@ export class MessagingUtils {
           ? ""
           : `<t:${Math.floor(queueMember.display_time.getTime() / 1000)}:${this.getTimestampFormat(storedGuild)}> `;
       const prioStr = `${queueMember.is_priority ? "⋆" : ""}`;
+
+      let rankStr = "";
+
+      try {
+        const r6Rank = await R6MemberSettingsTable.get(queueChannel.guild.id, queueMember.member_id);
+
+        if (r6Rank && r6Rank.cached_mmr) {
+          rankStr = `\`MMR:${r6Rank.cached_mmr}\``;
+          if (!r6Rank.cached_unranked) {
+            ranks.push(r6Rank.cached_mmr);
+          }
+        }
+      } catch (e) {
+        console.error("unable to add rank to display", e);
+      }
+
       const nameStr =
         storedGuild.disable_mentions && member?.displayName
           ? `\`${member.displayName}#${member?.user?.discriminator}\``
           : `<@${queueMember.member_id}>`;
       const msgStr = queueMember.personal_message ? " -- " + queueMember.personal_message : "";
 
-      entries.push(idxStr + timeStr + prioStr + nameStr + msgStr + "\n");
+      entries.push(idxStr + timeStr + prioStr + rankStr + nameStr + msgStr + "\n");
     }
 
-    const firstFieldName = storedQueue.max_members ? `Capacity:  ${position} / ${storedQueue.max_members}` : `Length:  ${position}`;
+    let firstFieldName = storedQueue.max_members ? `Capacity:  ${position} / ${storedQueue.max_members}` : `Length:  ${position}`;
+
+    if (ranks.length > 0) {
+      const max = Math.max(...ranks);
+      const min = Math.min(...ranks);
+      const diff = Math.abs(max - min);
+      if (diff > 0) {
+        firstFieldName += `, Max MMR Difference: ${diff}`;
+      }
+    }
 
     const embeds: MessageEmbed[] = [];
     let embedLength = title.length + description.length + firstFieldName.length;

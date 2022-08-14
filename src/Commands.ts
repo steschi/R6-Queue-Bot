@@ -1044,6 +1044,7 @@ export class Commands {
 
     const customMessage = parsed.string?.substring(0, 128);
     try {
+      await R6ApiUtils.tryUpdateRank(author.guild.id, author.id);
       await QueueMemberTable.store(queueChannel, author, customMessage);
       await parsed
         .reply({
@@ -2608,9 +2609,11 @@ export class Commands {
     try {
       const result = await R6MemberSettingsTable.get(author.guild.id, author.id);
 
+      const response = result ? `"${result?.ubisoft_username}"` : "not set.";
+
       await parsed
         .reply({
-          content: `Your Ubisoft name is "${result.ubisoft_username}".`,
+          content: `Your Ubisoft name is ${response}.`,
           commandDisplay: "EPHEMERAL",
         })
         .catch(() => null);
@@ -2660,15 +2663,12 @@ export class Commands {
         })
         .catch(() => null);
     } catch (e: any) {
-      if (e.author === "Queue Bot") {
-        await parsed
-          .reply({
-            content: "**ERROR**: " + e.message,
-            commandDisplay: "EPHEMERAL",
-          })
-          .catch(() => null);
-        return;
-      }
+      await parsed
+        .reply({
+          content: "**ERROR**: " + e.message,
+          commandDisplay: "EPHEMERAL",
+        })
+        .catch(() => null);
     }
   }
 }

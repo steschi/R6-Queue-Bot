@@ -1,8 +1,10 @@
+import { Snowflake } from "discord.js";
 import R6API from "r6api.js";
 
 import { Base } from "./Base";
+import { R6MemberSettingsTable } from "./tables/R6MemberSettings";
 
-const r6api = new R6API({ email: Base.config.r6API.ubisoftUsername, password: Base.config.r6API.ubisoftPassword });
+const r6api = new R6API({ email: Base.config.r6API.ubisoftEmail, password: Base.config.r6API.ubisoftPassword });
 
 export type Rank = {
   mmr: number;
@@ -31,7 +33,10 @@ export class R6ApiUtils {
         .map((v) => parseInt(v))
         .sort();
       const lastSeasonNumber = sortedSeasonNumbers[sortedSeasonNumbers.length - 1];
-      const currentSeasonData = rawRank.seasons[lastSeasonNumber].regions.emea.boards.pvp_ranked;
+      const currentSeasonData = rawRank.seasons[lastSeasonNumber].regions?.emea?.boards?.pvp_ranked?.current;
+      if (!currentSeasonData) {
+        console.error("unable to lookup rank");
+      }
       return {
         mmr: currentSeasonData.mmr,
         unranked: currentSeasonData.name === "Unranked",
@@ -40,8 +45,30 @@ export class R6ApiUtils {
 
     return ranks;
   }
-  static async lookupSingleRank(ubisoftIds: string): Promise<Rank | undefined> {
-    const { 0: rank } = await R6ApiUtils.lookupRank([ubisoftIds]);
+  static async lookupSingleRank(ubisoftId: string): Promise<Rank | undefined> {
+    const { 0: rank } = await R6ApiUtils.lookupRank([ubisoftId]);
     return rank;
+  }
+
+  static async tryUpdateRank(guildId: Snowflake, memberId: Snowflake) {
+    try {
+      const r6config = await R6MemberSettingsTable.get(guildId, memberId);
+
+      if (!r6config) {
+        console.log("err", "lookupSingleRank1");
+
+        return;
+      }
+
+      const rank = await R6ApiUtils.lookupSingleRank(r6config.ubisoft_user_id);
+      if (!rank) {
+        console.log("err", "lookupSingleRank2");
+        return;
+      }
+      await R6MemberSettingsTable.updateRank(guildId, memberId, rank.mmr, rank.unranked);
+      console.log("updated", r6config, rank);
+    } catch (e) {
+      console.error("unable to update rank", e);
+    }
   }
 }

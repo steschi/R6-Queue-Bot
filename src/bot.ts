@@ -19,6 +19,7 @@ import { Parsed, StoredQueue } from "./utilities/Interfaces";
 import { MessagingUtils } from "./utilities/MessagingUtils";
 import { ParsedCommand, ParsedMessage } from "./utilities/ParsingUtils";
 import { PatchingUtils } from "./utilities/PatchingUtils";
+import { R6ApiUtils } from "./utilities/R6ApiUtils";
 import { SchedulingUtils } from "./utilities/SchedulingUtils";
 import { SlashCommands } from "./utilities/SlashCommands";
 import { DisplayChannelTable } from "./utilities/tables/DisplayChannelTable";
@@ -800,6 +801,7 @@ async function joinLeaveButton(interaction: ButtonInteraction) {
       await QueueMemberTable.unstore(member.guild.id, queueChannel.id, [member.id], storedQueue.grace_period);
       await interaction.reply({ content: `You left ${queueChannel}.`, ephemeral: true }).catch(() => null);
     } else {
+      await R6ApiUtils.tryUpdateRank(member.guild.id, member.id);
       await QueueMemberTable.store(queueChannel, member);
       await interaction.reply({ content: `You joined ${queueChannel}.`, ephemeral: true }).catch(() => null);
     }
