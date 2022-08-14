@@ -66,7 +66,6 @@ export class R6ApiUtils {
         return;
       }
       await R6MemberSettingsTable.updateRank(guildId, memberId, rank.mmr, rank.unranked);
-      console.log("updated", r6config, rank);
     } catch (e) {
       console.error("unable to update rank", e);
     }
