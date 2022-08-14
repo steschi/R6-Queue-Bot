@@ -1526,7 +1526,7 @@
         "options": [
           {
             "name": "ubisoftname",
-            "description": "",
+            "description": "ubisoftname",
             "type": 3,
             "required": true
           }
