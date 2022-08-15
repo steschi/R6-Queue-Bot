@@ -23,6 +23,10 @@ export class R6MemberSettingsTable {
     });
   }
 
+  public static getbyUbisoftName(name: string) {
+    return Base.knex<R6MemberSetting>("r6_member_settings").where("ubisoft_username", name).first();
+  }
+
   public static get(guildId: Snowflake, memberId: Snowflake) {
     return Base.knex<R6MemberSetting>("r6_member_settings").where("guild_id", guildId).where("member_id", memberId).first();
   }

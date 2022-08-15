@@ -2641,8 +2641,19 @@ export class Commands {
     }
     const ubisoftUsername = parsed.string;
     const author = parsed.request.member as GuildMember;
-
     try {
+      const existingEntry = await R6MemberSettingsTable.getbyUbisoftName(ubisoftUsername);
+
+      if (existingEntry && existingEntry.member_id !== author.id) {
+        await parsed
+          .reply({
+            content: `**ERROR**: Ubisoft name "${ubisoftUsername}" is already used by someone else.`,
+            commandDisplay: "EPHEMERAL",
+          })
+          .catch(() => null);
+        return;
+      }
+
       const ubisoftId = await R6ApiUtils.lookupUbisoftId(ubisoftUsername);
       if (!ubisoftId) {
         await parsed
