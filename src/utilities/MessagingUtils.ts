@@ -194,13 +194,12 @@ export class MessagingUtils {
     if (queueMembers.some((member) => member.is_priority)) {
       description += `\nPriority users are marked with a ⋆.`;
     }
-    if (storedQueue.header) {
-      description += `\n\n${storedQueue.header}`;
-    }
+
     // Create a list of entries
     let position = 0;
     const entries: string[] = [];
     let ranks: number[] = [];
+    let queueHasMembersWithoutUbisoftname = false;
     for await (const queueMember of queueMembers) {
       let member: GuildMember;
       if (storedGuild.disable_mentions) {
@@ -226,6 +225,10 @@ export class MessagingUtils {
 
       try {
         const r6Rank = await R6MemberSettingsTable.get(queueChannel.guild.id, queueMember.member_id);
+
+        if (!r6Rank || !r6Rank.ubisoft_username || !r6Rank.cached_mmr) {
+          queueHasMembersWithoutUbisoftname = true;
+        }
 
         if (r6Rank) {
           const emojiName = getEmojiNameForMMR(r6Rank.cached_mmr, r6Rank.cached_unranked);
@@ -266,6 +269,12 @@ export class MessagingUtils {
       }
     }
 
+    if (queueHasMembersWithoutUbisoftname) {
+      description += `\nIf your R6 rank is not shown use \`/ubisoftname set <your-ubisoft-name>\`.`;
+    }
+    if (storedQueue.header) {
+      description += `\n\n${storedQueue.header}`;
+    }
     const embeds: MessageEmbed[] = [];
     let embedLength = title.length + description.length + firstFieldName.length;
     let fields: EmbedFieldData[] = [];

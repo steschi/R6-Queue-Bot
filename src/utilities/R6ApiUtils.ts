@@ -53,16 +53,13 @@ export class R6ApiUtils {
   static async tryUpdateRank(guildId: Snowflake, memberId: Snowflake) {
     try {
       const r6config = await R6MemberSettingsTable.get(guildId, memberId);
-
       if (!r6config) {
-        console.log("err", "lookupSingleRank1");
-
         return;
       }
 
       const rank = await R6ApiUtils.lookupSingleRank(r6config.ubisoft_user_id);
       if (!rank) {
-        console.log("err", "lookupSingleRank2");
+        console.log("unable to lookup MMR for ubisoft name", r6config.ubisoft_username);
         return;
       }
       await R6MemberSettingsTable.updateRank(guildId, memberId, rank.mmr, rank.unranked);
