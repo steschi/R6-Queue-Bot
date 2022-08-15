@@ -3,6 +3,7 @@ import {
   DiscordAPIError,
   EmbedFieldData,
   GuildBasedChannel,
+  GuildEmoji,
   GuildMember,
   Message,
   MessageActionRow,
@@ -21,6 +22,43 @@ import { QueueMemberTable } from "./tables/QueueMemberTable";
 import { QueueTable } from "./tables/QueueTable";
 import { R6MemberSettingsTable } from "./tables/R6MemberSettings";
 import { Validator } from "./Validator";
+
+// Rank: n1 <= X < n2 -> emoji name
+const MmrToRankMapping: [number, number, string][] = [
+  [0, 1600, "copper1"],
+  [1600, 1700, "bronze5"],
+  [1700, 1800, "bronze4"],
+  [1800, 1900, "bronze3"],
+  [1900, 2000, "bronze2"],
+  [2000, 2100, "bronze1"],
+  [2100, 2200, "silver5"],
+  [2200, 2300, "silver4"],
+  [2300, 2400, "silver3"],
+  [2400, 2500, "silver2"],
+  [2500, 2600, "silver1"],
+  [2600, 2800, "gold3"],
+  [2800, 3000, "gold2"],
+  [3000, 3200, "gold1"],
+  [3200, 3500, "platinum3"],
+  [3500, 3800, "platinum2"],
+  [3800, 4100, "platinum1"],
+  [4100, 4400, "diamond3"],
+  [4400, 4700, "diamond2"],
+  [4700, 5000, "diamond1"],
+  [5000, Number.POSITIVE_INFINITY, "champions"],
+];
+
+function getEmojiNameForMMR(mmr: number | null, unranked: boolean): string {
+  if (unranked || mmr === null) {
+    return "unranked";
+  }
+  for (const range of MmrToRankMapping) {
+    if (range[0] <= mmr && mmr < range[1]) {
+      return range[2];
+    }
+  }
+  return "unranked";
+}
 
 export class MessagingUtils {
   private static gracePeriodCache = new Map<number, string>();
@@ -121,6 +159,10 @@ export class MessagingUtils {
       return [];
     }
     let queueMembers = await QueueMemberTable.getFromQueueOrdered(queueChannel);
+    const emojis: Record<string, GuildEmoji> = {};
+    queueChannel.guild.client.emojis.cache.forEach((emj) => {
+      emojis[emj.name] = emj;
+    });
 
     // Title
     let title = `${storedQueue.is_locked ? "🔒 " : ""}${queueChannel.name}`;
@@ -185,8 +227,17 @@ export class MessagingUtils {
       try {
         const r6Rank = await R6MemberSettingsTable.get(queueChannel.guild.id, queueMember.member_id);
 
-        if (r6Rank && r6Rank.cached_mmr) {
-          rankStr = `\`MMR:${r6Rank.cached_mmr}\` `;
+        if (r6Rank) {
+          const emojiName = getEmojiNameForMMR(r6Rank.cached_mmr, r6Rank.cached_unranked);
+          const emoji = emojis[emojiName];
+          if (emoji) {
+            rankStr = `${emoji}  `;
+          }
+
+          if (r6Rank.cached_mmr) {
+            rankStr += `\`${r6Rank.cached_mmr}\`  `;
+          }
+
           if (!r6Rank.cached_unranked) {
             ranks.push(r6Rank.cached_mmr);
           }

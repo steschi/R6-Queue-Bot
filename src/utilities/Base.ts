@@ -70,7 +70,6 @@ export class Base {
       } else if (
         [
           "GuildBanManager",
-          "GuildEmojiManager",
           "PresenceManager",
           "ReactionManager",
           "ReactionUserManager",
@@ -96,7 +95,7 @@ export class Base {
       ],
       status: "online",
     },
-    intents: ["GUILDS", "GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILD_MEMBERS"],
+    intents: ["GUILDS", "GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILD_MEMBERS", "GUILD_EMOJIS_AND_STICKERS"],
     shards: "auto",
   });
 

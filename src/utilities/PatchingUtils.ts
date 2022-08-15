@@ -25,8 +25,8 @@ import { PriorityTable } from "./tables/PriorityTable";
 import { QueueGuildTable } from "./tables/QueueGuildTable";
 import { QueueMemberTable } from "./tables/QueueMemberTable";
 import { QueueTable } from "./tables/QueueTable";
-import { ScheduleTable } from "./tables/ScheduleTable";
 import { R6MemberSettingsTable } from "./tables/R6MemberSettings";
+import { ScheduleTable } from "./tables/ScheduleTable";
 
 interface Note {
   sent: boolean;
