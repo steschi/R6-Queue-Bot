@@ -239,9 +239,6 @@ export class MessagingUtils {
 
           if (r6Rank.cached_mmr) {
             rankStr += `\`${r6Rank.cached_mmr}\`  `;
-          }
-
-          if (!r6Rank.cached_unranked) {
             ranks.push(r6Rank.cached_mmr);
           }
         }
