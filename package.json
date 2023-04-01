@@ -19,7 +19,7 @@
     "cronstrue": "^2.11.0",
     "delay": "^5.0.0",
     "discord-slash-commands-client": "^1.2.2",
-    "discord.js": "^13.9.2",
+    "discord.js": "^13.14.0",
     "knex": "^2.2.0",
     "knex-schema-inspector": "^2.0.3",
     "lodash": "^4.17.21",
